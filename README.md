@@ -79,6 +79,8 @@ npm run preview
      - **Absent**: Removes from current session and spins again
      - **Cancel**: Dismisses without changes
 
+## Deployment
+Other version of this app is configured for easy deployment to GitHub Pages. Access the site at `https://MrCYlmz.github.io/dew-luck/`
 
 ## Architecture
 
