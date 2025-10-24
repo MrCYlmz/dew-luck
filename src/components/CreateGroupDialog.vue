@@ -4,6 +4,8 @@ import type { GroupCreateRequest } from '../types';
 import { createGroup } from '../requests/requests';
 import GroupForm from './GroupForm.vue';
 
+const emit = defineEmits(['closed']);
+
 const dialogRef = ref<HTMLDialogElement | null>(null);
 
 const form = reactive<GroupCreateRequest & { isWeightedSelection: boolean }>({
@@ -20,6 +22,7 @@ function openDialog() {
 
 function closeDialog() {
   dialogRef.value?.close();
+  emit('closed');
 }
 
 function addPerson() {
