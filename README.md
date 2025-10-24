@@ -13,27 +13,13 @@ A Vue 3 + TypeScript + Vite application for managing weighted random person sele
   - **Absent**: Temporarily removes person from current session and spins again
   - **Cancel**: Closes dialog without any changes
 - **Selection Reset**: Reset all selections for a group to start fresh
+- **LocalStorage Persistence**: All data is stored locally in your browser (no backend required)
 
 ## Requirements
 
-### Backend Dependency
-
-**IMPORTANT**: This frontend application requires a REST API backend to function. The backend must be running at `http://localhost:3000` (configurable in `src/requests/requests.ts`).
-
-For local development, use the companion backend:
-- Repository: [dew-luck-backend](https://github.com/celal/dew-luck-backend) (check the profile)
-- The backend should provide the following REST endpoints:
-  - `GET /groups` - Fetch all groups
-  - `POST /groups` - Create a new group
-  - `PUT /groups/:id` - Update a group
-  - `DELETE /groups/:id` - Delete a group
-  - `PUT /groups/:id/persons/:name/selected` - Mark a person as selected
-  - `PUT /groups/:id/reset-selections` - Reset all selections in a group
-
-### System Requirements
-
 - Node.js (v16 or higher recommended)
 - npm or yarn package manager
+- Modern web browser with localStorage support
 
 ## Installation
 
@@ -61,9 +47,8 @@ npm run preview
 
 ## Usage
 
-1. **Start the Backend**: Make sure the `dew-luck-backend` is running on `http://localhost:3000`
-2. **Start the Frontend**: Run `npm run dev` and open `http://localhost:5173`
-3. **Create a Group**:
+1. **Start the Application**: Run `npm run dev` and open `http://localhost:5173`
+2. **Create a Group**:
    - Click "Create Group"
    - Enter a group name
    - Toggle "Weighted Selection" if you want custom weights
@@ -106,12 +91,25 @@ The spinning wheel uses progressive deceleration for a natural feel:
 - Progressive slowdown with increasing delays
 - 3 full rotations plus the target segment
 
-## Configuration
+## Data Storage
 
-To change the backend API URL, modify `src/requests/requests.ts`:
+All data is stored in your browser's localStorage under the key `dew-luck-groups`. This means:
+- **No backend required**: The app runs entirely in your browser
+- **Persistent data**: Your groups persist across browser sessions
+- **Browser-specific**: Data is tied to the specific browser and domain
+- **Privacy**: No data leaves your computer
 
-```typescript
-const API_BASE_URL = 'http://localhost:3000'; // Change this to your backend URL
+### Clearing Data
+
+To clear all stored data:
+1. Open browser DevTools (F12)
+2. Go to Application/Storage tab
+3. Find localStorage → your domain
+4. Delete the `dew-luck-groups` key
+
+Or programmatically in the browser console:
+```javascript
+localStorage.removeItem('dew-luck-groups');
 ```
 
 ## Contributing
@@ -130,8 +128,8 @@ MIT License - feel free to use this project for any purpose.
 
 For issues or questions:
 - Open an issue on GitHub
-- Refer to the backend repository for API-related issues
+- Check the `CLAUDE.md` file for development guidelines
 
 ---
 
-**Note**: This is a frontend application only. Make sure the backend server is running before starting development or production use.
+**Note**: This is a fully client-side application. All data is stored locally in your browser using localStorage.
