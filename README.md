@@ -45,6 +45,9 @@ npm run build
 npm run preview
 ```
 
+## Deployment
+This app is configured for easy deployment to GitHub Pages. Access the site at `https://MrCYlmz.github.io/dew-luck/`
+
 ## Usage
 
 1. **Start the Application**: Run `npm run dev` and open `http://localhost:5173`
