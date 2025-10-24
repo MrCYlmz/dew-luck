@@ -5,6 +5,7 @@ import CreateGroupDialog from './CreateGroupDialog.vue';
 import EditGroupDialog from './EditGroupDialog.vue';
 import DeleteGroupDialog from './DeleteGroupDialog.vue';
 import ResetSelectionsDialog from './ResetSelectionsDialog.vue';
+import CopyGroupDialog from './CopyGroupDialog.vue';
 import type { GroupDetails } from '../types';
 import { fetchGroups, invalidateGroupsCache } from '../requests/requests';
 
@@ -12,6 +13,7 @@ const createDialogRef = ref<InstanceType<typeof CreateGroupDialog>>();
 const editDialogRef = ref<InstanceType<typeof EditGroupDialog>>();
 const deleteDialogRef = ref<InstanceType<typeof DeleteGroupDialog>>();
 const resetSelectionsDialogRef = ref<InstanceType<typeof ResetSelectionsDialog>>();
+const copyDialogRef = ref<InstanceType<typeof CopyGroupDialog>>();
 
 const selectedGroup = ref<GroupDetails>();
 const groupSelectionRef = ref<InstanceType<typeof GroupSelection>>();
@@ -39,6 +41,10 @@ function openCreateDialog() {
   createDialogRef.value?.openDialog();
 }
 
+function openCopyDialog() {
+  copyDialogRef.value?.openDialog();
+}
+
 function openResetSelectionsDialog() {
   resetSelectionsDialogRef.value?.openDialog();
 }
@@ -51,6 +57,7 @@ loadGroups();
     <h1>Group Manager</h1>
     <div style="margin-bottom: 16px;">
       <button @click="openCreateDialog">Create Group</button>
+      <button @click="openCopyDialog" :disabled="!selectedGroup">Copy Group</button>
       <button @click="openEditDialog" :disabled="!selectedGroup">Edit Group</button>
       <button @click="openDeleteDialog" :disabled="!selectedGroup">Delete Group</button>
       <button @click="openResetSelectionsDialog" :disabled="!selectedGroup">Reset Selections</button>
@@ -62,6 +69,11 @@ loadGroups();
       @refresh="loadGroups"
     />
     <CreateGroupDialog ref="createDialogRef" @closed="loadGroups" />
+    <CopyGroupDialog
+      ref="copyDialogRef"
+      :group="selectedGroup"
+      @closed="loadGroups"
+    />
     <EditGroupDialog
       ref="editDialogRef"
       :group="selectedGroup"
