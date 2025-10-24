@@ -51,6 +51,34 @@ function getLabelFontWeight(isHighlighted: boolean): string {
   return isHighlighted ? 'bold' : 'normal';
 }
 
+/**
+ * Calculate rotation angle for text to align radially with segment
+ * Text will point from circumference toward center (or outward for bottom half to stay readable)
+ */
+function getTextRotation(segment: WheelSegment): string {
+  const midAngle = (segment.startAngle + segment.endAngle) / 2;
+  // Convert radians to degrees
+  let degrees = (midAngle * 180) / Math.PI;
+
+  // Add 90 degrees to make text perpendicular to arc (radial instead of tangential)
+  degrees += 90;
+
+  // For left half of wheel (90° to 270°), flip 180° to keep text readable
+  // This makes text point outward instead of inward, but keeps it right-side up
+  if (degrees > 180 && degrees < 360) {
+    degrees += 180;
+  }
+
+  const position = polarToCartesian(
+    WHEEL_CENTER,
+    WHEEL_CENTER,
+    WHEEL_LABEL_RADIUS,
+    midAngle
+  );
+
+  return `rotate(${degrees}, ${position.x}, ${position.y})`;
+}
+
 const centerText = computed(() => (props.animating ? 'Spinning...' : 'Spin'));
 
 function handleClick() {
@@ -108,6 +136,7 @@ function handleClick() {
                 (segment.startAngle + segment.endAngle) / 2
               ).y
             "
+            :transform="getTextRotation(segment)"
             text-anchor="middle"
             alignment-baseline="middle"
             :font-size="LABEL_FONT_SIZE"
