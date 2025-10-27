@@ -1,14 +1,22 @@
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue';
-import type { GroupCreateRequest } from '../types';
-import { createGroup } from '../requests/requests';
-import GroupForm from './GroupForm.vue';
+import type { GroupDetails } from '@/types.ts';
+import { createGroup } from '@/requests/requests.ts';
+import GroupForm from '../GroupForm.vue';
 
+const props = defineProps<{
+  group?: GroupDetails;
+}>();
 const emit = defineEmits(['closed']);
 
 const dialogRef = ref<HTMLDialogElement | null>(null);
 
-const form = reactive<GroupCreateRequest & { isWeightedSelection: boolean }>({
+const form = reactive<{
+  name: string;
+  respectEarlySelection: boolean;
+  isWeightedSelection: boolean;
+  people: { name: string; weight: number; isSelected: boolean }[];
+}>({
   name: '',
   respectEarlySelection: false,
   isWeightedSelection: false,
@@ -16,8 +24,18 @@ const form = reactive<GroupCreateRequest & { isWeightedSelection: boolean }>({
 });
 
 function openDialog() {
-  resetForm();
-  dialogRef.value?.showModal();
+  if (props.group) {
+    // Copy all data from selected group except name (name stays empty)
+    form.name = '';
+    form.respectEarlySelection = props.group.respectEarlySelection;
+    form.isWeightedSelection = props.group.people.some((p) => p.weight !== 1);
+    form.people = props.group.people.map((p) => ({
+      name: p.name,
+      weight: p.weight,
+      isSelected: false, // Reset selection status for new group
+    }));
+    dialogRef.value?.showModal();
+  }
 }
 
 function closeDialog() {
@@ -33,18 +51,11 @@ function removePerson(idx: number) {
   form.people.splice(idx, 1);
 }
 
-function resetForm() {
-  form.name = '';
-  form.respectEarlySelection = false;
-  form.isWeightedSelection = false;
-  form.people = [];
-}
-
 watch(
   () => form.isWeightedSelection,
   (val) => {
     if (!val) {
-      form.people.forEach(p => p.weight = 1);
+      form.people.forEach((p) => (p.weight = 1));
     }
   }
 );
@@ -53,8 +64,7 @@ async function handleSubmit() {
   await createGroup({
     name: form.name,
     respectEarlySelection: form.respectEarlySelection,
-    isWeightedSelection: form.isWeightedSelection,
-    people: form.people.map(p => ({
+    people: form.people.map((p) => ({
       name: p.name,
       weight: form.isWeightedSelection ? p.weight : 1,
       isSelected: false,
@@ -62,6 +72,7 @@ async function handleSubmit() {
   } as any);
   closeDialog();
 }
+
 defineExpose({ openDialog, closeDialog });
 </script>
 

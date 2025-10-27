@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { deleteGroup } from '../requests/requests';
-import type { GroupDetails } from '../types';
+import { deleteGroup } from '@/requests/requests.ts';
+import type { GroupDetails } from '@/types.ts';
 
 const props = defineProps<{
   group?: GroupDetails;

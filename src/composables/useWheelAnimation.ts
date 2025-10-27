@@ -6,7 +6,7 @@ import {
   ANIMATION_DELAY_INCREMENT_PHASE1,
   ANIMATION_DELAY_INCREMENT_PHASE2,
   ANIMATION_ROUNDS,
-} from '../components/wheelConstants';
+} from '../components/molecules/wheelConstants';
 
 
 async function animateWheelSpin(

@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import GroupSelection from './GroupSelection.vue';
-import CreateGroupDialog from './CreateGroupDialog.vue';
-import EditGroupDialog from './EditGroupDialog.vue';
-import DeleteGroupDialog from './DeleteGroupDialog.vue';
-import ResetSelectionsDialog from './ResetSelectionsDialog.vue';
-import CopyGroupDialog from './CopyGroupDialog.vue';
-import ShareGroupDialog from './ShareGroupDialog.vue';
-import ImportGroupDialog from './ImportGroupDialog.vue';
-import type { GroupDetails } from '../types';
-import { fetchGroups, invalidateGroupsCache } from '../requests/requests';
-import { decodeGroupFromUrl, clearSharedGroupFromUrl } from '../utils/urlSharing';
+import GroupSelection from '../molecules/GroupSelection.vue';
+import CreateGroupDialog from '../molecules/group-actions/CreateGroupDialog.vue';
+import EditGroupDialog from '../molecules/group-actions/EditGroupDialog.vue';
+import DeleteGroupDialog from '../molecules/group-actions/DeleteGroupDialog.vue';
+import ResetSelectionsDialog from '../molecules/group-actions/ResetSelectionsDialog.vue';
+import CopyGroupDialog from '../molecules/group-actions/CopyGroupDialog.vue';
+import ShareGroupDialog from '../molecules/group-actions/ShareGroupDialog.vue';
+import ImportGroupDialog from '../molecules/ImportGroupDialog.vue';
+import type { GroupDetails } from '@/types.ts';
+import { fetchGroups, invalidateGroupsCache } from '@/requests/requests.ts';
+import { decodeGroupFromUrl, clearSharedGroupFromUrl } from '@/utils/urlSharing.ts';
 
 const createDialogRef = ref<InstanceType<typeof CreateGroupDialog>>();
 const editDialogRef = ref<InstanceType<typeof EditGroupDialog>>();

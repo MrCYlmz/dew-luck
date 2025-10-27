@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue';
-import type { GroupDetails } from '../types';
-import { updateGroup } from '../requests/requests';
-import GroupForm from './GroupForm.vue';
+import type { GroupDetails } from '@/types.ts';
+import { updateGroup } from '@/requests/requests.ts';
+import GroupForm from '../GroupForm.vue';
 
 const props = defineProps<{
   group?: GroupDetails;

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { GroupDetails } from '../types';
-import { resetSelectionsOfGroup } from '../requests/requests';
+import type { GroupDetails } from '@/types.ts';
+import { resetSelectionsOfGroup } from '@/requests/requests.ts';
 
 const props = defineProps<{
   group?: GroupDetails;

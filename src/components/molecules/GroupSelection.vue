@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import type { GroupDetails } from '../types';
+import type { GroupDetails } from '@/types';
 import RandomPersonSelector from "./RandomPersonSelector.vue";
 
 const props = defineProps<{

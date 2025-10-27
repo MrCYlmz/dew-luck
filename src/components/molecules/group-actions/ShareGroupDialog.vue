@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import type { GroupDetails } from '../types';
-import { encodeGroupToUrl } from '../utils/urlSharing';
+import type { GroupDetails } from '@/types.ts';
+import { encodeGroupToUrl } from '@/utils/urlSharing.ts';
 
 const props = defineProps<{
   group?: GroupDetails;

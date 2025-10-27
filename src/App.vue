@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import GroupManager from './components/GroupManager.vue'
+import GroupManager from './components/organisms/GroupManager.vue'
 </script>
 
 <template>

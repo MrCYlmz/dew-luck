@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import type { GroupDetails, Person } from '../types';
-import { useWheelSegments } from '../composables/useWheelSegments';
-import { useWheelAnimation } from '../composables/useWheelAnimation';
-import { useSelectionDialog } from '../composables/useSelectionDialog';
+import type { GroupDetails, Person } from '@/types.ts';
+import { useWheelSegments } from '@/composables/useWheelSegments.ts';
+import { useWheelAnimation } from '@/composables/useWheelAnimation.ts';
+import { useSelectionDialog } from '@/composables/useSelectionDialog.ts';
 import WheelSVG from './WheelSVG.vue';
 
 const props = defineProps<{ group?: GroupDetails }>();
@@ -11,7 +11,6 @@ const emit = defineEmits(['updated']);
 
 const availablePeople = ref<Person[]>([]);
 
-// Use composables for organized state management
 const { weights, totalWeight, wheelSegments } = useWheelSegments(availablePeople);
 
 const {
