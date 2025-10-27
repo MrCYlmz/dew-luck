@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -7,4 +8,9 @@ export default defineConfig({
   // Set base to your repository name for GitHub Pages
   // Change this to '/' if deploying to a custom domain
   base: '/dew-luck/',
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
 })
