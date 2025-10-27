@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { GroupCreateRequest } from '../types';
-import { createGroup } from '../requests/requests';
+import type { GroupCreateRequest } from '@/types.ts';
+import { createGroup } from '@/requests/requests.ts';
 
 const emit = defineEmits(['imported', 'closed']);
 

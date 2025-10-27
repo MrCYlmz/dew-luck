@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { WheelSegment } from '../composables/useWheelSegments';
-import { polarToCartesian, describeArc } from '../utils/svgGeometry';
+import type { WheelSegment } from '@/composables/useWheelSegments.ts';
+import { polarToCartesian, describeArc } from '@/utils/svgGeometry.ts';
 import {
   WHEEL_SIZE,
   WHEEL_CENTER,
