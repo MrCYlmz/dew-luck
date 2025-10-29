@@ -34,8 +34,10 @@ export function useSelectionDialog(
     availablePeople.value = availablePeople.value.filter(
       (p) => p.name !== selectedPerson.value?.name
     );
-    closeDialog();
-    spinWheel();
+    closeDialog()
+    spinWheel().then( async () => {
+       await openDialog();
+    })
   }
 
   function handleCancel(): void {
