@@ -1,4 +1,5 @@
 import type { GroupCreateRequest } from '../types';
+import { generateId } from './id';
 
 const URL_PARAM_KEY = 'shared';
 
@@ -40,6 +41,20 @@ export function decodeGroupFromUrl(): GroupCreateRequest | null {
     // Validate the group structure
     if (!group.name || !Array.isArray(group.people)) {
       throw new Error('Invalid group structure');
+    }
+
+    group.people = group.people
+      .filter((person) => typeof person.name === 'string' && person.name.trim().length > 0)
+      .map((person) => ({
+        ...person,
+        id: person.id || generateId(),
+        weight: Number.isFinite(Number(person.weight)) && Number(person.weight) > 0
+          ? Number(person.weight)
+          : 1,
+      }));
+
+    if (group.people.length === 0) {
+      throw new Error('Shared group has no valid people');
     }
 
     return group;

@@ -46,7 +46,7 @@ defineExpose({ openDialog, closeDialog });
         <div>
           <strong>People ({{ groupToImport.people.length }}):</strong>
           <ul class="people-list">
-            <li v-for="person in groupToImport.people" :key="person.name">
+            <li v-for="person in groupToImport.people" :key="person.id">
               {{ person.name }} (weight: {{ person.weight }}<template v-if="groupToImport.respectEarlySelection">, selected: {{ person.isSelected ? 'Yes' : 'No' }}</template>)
             </li>
           </ul>

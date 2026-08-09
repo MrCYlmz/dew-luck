@@ -1,4 +1,5 @@
 import type { GroupCreateRequest, GroupDetails } from '../types.ts';
+import { generateId } from '../utils/id.ts';
 
 const STORAGE_KEY = 'dew-luck-groups';
 
@@ -6,15 +7,34 @@ let groupsCache: GroupDetails[] | undefined = undefined;
 
 function getGroupsFromStorage(): GroupDetails[] {
   const stored = localStorage.getItem(STORAGE_KEY);
-  return stored ? JSON.parse(stored) : [];
+  let groups: GroupDetails[] = [];
+  if (stored) {
+    try {
+      groups = JSON.parse(stored);
+    } catch (error) {
+      console.warn('Corrupted dew-luck-groups data in localStorage, resetting.', error);
+    }
+  }
+
+  // Backfill ids for people persisted before `Person.id` existed.
+  let mutated = false;
+  for (const group of groups) {
+    for (const person of group.people) {
+      if (!person.id) {
+        person.id = generateId();
+        mutated = true;
+      }
+    }
+  }
+  if (mutated) {
+    saveGroupsToStorage(groups);
+  }
+
+  return groups;
 }
 
 function saveGroupsToStorage(groups: GroupDetails[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(groups));
-}
-
-function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
 export function invalidateGroupsCache() {
@@ -63,11 +83,11 @@ export async function deleteGroup(groupId: string) {
   return { ok: true };
 }
 
-export async function selectPerson(groupId: string, personName: string) {
+export async function selectPerson(groupId: string, personId: string) {
   const groups = getGroupsFromStorage();
   const group = groups.find((g) => g.id === groupId);
   if (group) {
-    const person = group.people.find((p) => p.name === personName);
+    const person = group.people.find((p) => p.id === personId);
     if (person) {
       person.isSelected = true;
       saveGroupsToStorage(groups);

@@ -24,7 +24,7 @@ export function useSelectionDialog(
 
   async function handleSelect(group?: GroupDetails): Promise<void> {
     if (!group || !selectedPerson.value) return;
-    await selectPerson(group.id, selectedPerson.value.name);
+    await selectPerson(group.id, selectedPerson.value.id);
     closeDialog();
     onUpdated();
   }
@@ -32,7 +32,7 @@ export function useSelectionDialog(
   function handleAbsent(): void {
     if (!selectedPerson.value) return;
     availablePeople.value = availablePeople.value.filter(
-      (p) => p.name !== selectedPerson.value?.name
+      (p) => p.id !== selectedPerson.value?.id
     );
     closeDialog()
     spinWheel().then( async () => {
