@@ -20,6 +20,7 @@ export function useRunawayButton() {
   const offset = ref({ x: 0, y: 0 });
 
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  let base: { left: number; top: number } | undefined;
 
   const buttonStyle = computed<CSSProperties>(() =>
     isRunning.value
@@ -44,6 +45,7 @@ export function useRunawayButton() {
     }
 
     offset.value = { x: 0, y: 0 };
+    base = undefined;
     isRunning.value = true;
     document.addEventListener('pointermove', handlePointerMove);
     timeoutId = setTimeout(stop, RUNAWAY_DURATION);
@@ -57,16 +59,24 @@ export function useRunawayButton() {
     document.removeEventListener('pointermove', handlePointerMove);
     isRunning.value = false;
     offset.value = { x: 0, y: 0 };
+    base = undefined;
   }
 
   function handlePointerMove(event: PointerEvent): void {
     const button = buttonRef.value;
     if (!button) return;
 
-    // The rect already includes the current translate.
+    // Only the size is read from the live rect — a translate doesn't change it.
     const rect = button.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
+    if (!base) {
+      // First move of the run: the offset is still zero, so this rect is the
+      // untransformed one.
+      base = { left: rect.left, top: rect.top };
+    }
+
+    // Where the button is headed, not where it currently renders mid-transition.
+    const centerX = base.left + offset.value.x + rect.width / 2;
+    const centerY = base.top + offset.value.y + rect.height / 2;
 
     let dx = centerX - event.clientX;
     let dy = centerY - event.clientY;
@@ -85,9 +95,7 @@ export function useRunawayButton() {
     const nextX = offset.value.x + (dx / distance) * jump;
     const nextY = offset.value.y + (dy / distance) * jump;
 
-    // Untransformed position, used to keep the button inside the viewport.
-    const baseLeft = rect.left - offset.value.x;
-    const baseTop = rect.top - offset.value.y;
+    const { left: baseLeft, top: baseTop } = base;
 
     offset.value = {
       x: clamp(

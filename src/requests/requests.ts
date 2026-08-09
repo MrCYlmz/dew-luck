@@ -11,9 +11,14 @@ function getGroupsFromStorage(): GroupDetails[] {
   let groups: GroupDetails[] = [];
   if (stored) {
     try {
-      groups = JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        groups = parsed;
+      } else {
+        console.warn('Unexpected dew-luck-groups data in localStorage, ignoring it.');
+      }
     } catch (error) {
-      console.warn('Corrupted dew-luck-groups data in localStorage, resetting.', error);
+      console.warn('Corrupted dew-luck-groups data in localStorage, ignoring it.', error);
     }
   }
 
@@ -21,6 +26,10 @@ function getGroupsFromStorage(): GroupDetails[] {
   for (const group of groups) {
     if (!group.selectionStyle) {
       group.selectionStyle = DEFAULT_SELECTION_STYLE;
+      mutated = true;
+    }
+    if (!Array.isArray(group.people)) {
+      group.people = [];
       mutated = true;
     }
     for (const person of group.people) {
