@@ -27,7 +27,6 @@ const groups = ref<GroupDetails[]>([]);
 async function loadGroups() {
   invalidateGroupsCache();
   groups.value = await fetchGroups();
-  selectedGroup.value = undefined;
 }
 
 function handleGroupSelected(group: GroupDetails) {

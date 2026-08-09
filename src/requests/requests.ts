@@ -1,4 +1,6 @@
 import type { GroupCreateRequest, GroupDetails } from '../types.ts';
+import { DEFAULT_SELECTION_STYLE } from '../types.ts';
+import { generateId } from '../utils/id.ts';
 
 const STORAGE_KEY = 'dew-luck-groups';
 
@@ -6,15 +8,46 @@ let groupsCache: GroupDetails[] | undefined = undefined;
 
 function getGroupsFromStorage(): GroupDetails[] {
   const stored = localStorage.getItem(STORAGE_KEY);
-  return stored ? JSON.parse(stored) : [];
+  let groups: GroupDetails[] = [];
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        groups = parsed;
+      } else {
+        console.warn('Unexpected dew-luck-groups data in localStorage, ignoring it.');
+      }
+    } catch (error) {
+      console.warn('Corrupted dew-luck-groups data in localStorage, ignoring it.', error);
+    }
+  }
+
+  let mutated = false;
+  for (const group of groups) {
+    if (!group.selectionStyle) {
+      group.selectionStyle = DEFAULT_SELECTION_STYLE;
+      mutated = true;
+    }
+    if (!Array.isArray(group.people)) {
+      group.people = [];
+      mutated = true;
+    }
+    for (const person of group.people) {
+      if (!person.id) {
+        person.id = generateId();
+        mutated = true;
+      }
+    }
+  }
+  if (mutated) {
+    saveGroupsToStorage(groups);
+  }
+
+  return groups;
 }
 
 function saveGroupsToStorage(groups: GroupDetails[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(groups));
-}
-
-function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
 export function invalidateGroupsCache() {
@@ -36,6 +69,7 @@ export async function createGroup(data: GroupCreateRequest) {
     id: data.id || generateId(),
     name: data.name,
     respectEarlySelection: data.respectEarlySelection,
+    selectionStyle: data.selectionStyle || DEFAULT_SELECTION_STYLE,
     people: data.people,
   };
   groups.push(newGroup);
@@ -63,11 +97,11 @@ export async function deleteGroup(groupId: string) {
   return { ok: true };
 }
 
-export async function selectPerson(groupId: string, personName: string) {
+export async function selectPerson(groupId: string, personId: string) {
   const groups = getGroupsFromStorage();
   const group = groups.find((g) => g.id === groupId);
   if (group) {
-    const person = group.people.find((p) => p.name === personName);
+    const person = group.people.find((p) => p.id === personId);
     if (person) {
       person.isSelected = true;
       saveGroupsToStorage(groups);

@@ -1,11 +1,8 @@
 <script setup lang="ts">
+import type { GroupFormState } from '@/composables/useGroupForm.ts';
+
 defineProps<{
-  form: {
-    name: string;
-    respectEarlySelection: boolean;
-    isWeightedSelection: boolean;
-    people: { name: string; weight: number; isSelected: boolean }[];
-  };
+  form: GroupFormState;
   isEdit?: boolean;
 }>();
 
@@ -27,9 +24,16 @@ const emit = defineEmits(['addPerson', 'removePerson', 'submit', 'cancel']);
       Weighted Selection:
       <input type="checkbox" v-model="form.isWeightedSelection" />
     </label>
+    <label>
+      Selection Style:
+      <select v-model="form.selectionStyle">
+        <option value="wheel">Spinning Wheel</option>
+        <option value="cards">Card Shuffle</option>
+      </select>
+    </label>
     <div>
       <h3>People</h3>
-      <div v-for="(person, idx) in form.people" :key="idx" style="margin-bottom: 8px;">
+      <div v-for="(person, idx) in form.people" :key="person.id" style="margin-bottom: 8px;">
         <input v-model="person.name" placeholder="Name" required />
         <input
           v-model.number="person.weight"
