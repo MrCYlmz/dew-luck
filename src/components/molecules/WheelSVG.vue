@@ -89,13 +89,21 @@ function handleClick() {
 </script>
 
 <template>
-  <div class="wheel-container">
+  <div
+    class="wheel-container"
+    role="button"
+    tabindex="0"
+    :aria-label="animating ? 'Wheel is spinning' : 'Spin the wheel'"
+    :aria-disabled="animating"
+    @click="handleClick"
+    @keydown.enter="handleClick"
+    @keydown.space.prevent="handleClick"
+  >
     <svg
       :width="WHEEL_SIZE"
       :height="WHEEL_SIZE"
       :viewBox="`0 0 ${WHEEL_SIZE} ${WHEEL_SIZE}`"
       class="wheel-svg"
-      @click="handleClick"
     >
       <g>
         <template v-for="segment in segments" :key="segment.idx">
@@ -177,12 +185,14 @@ function handleClick() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 24px 0;
+  margin: 24px auto;
+  width: fit-content;
+  cursor: pointer;
+  user-select: none;
 }
 
 .wheel-svg {
-  user-select: none;
-  cursor: pointer;
+  pointer-events: none;
 }
 
 .wheel-segment {
