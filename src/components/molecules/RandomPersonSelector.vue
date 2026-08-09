@@ -1,26 +1,41 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import type { GroupDetails, Person } from '@/types.ts';
+import { DEFAULT_SELECTION_STYLE } from '@/types.ts';
 import { useWheelSegments } from '@/composables/useWheelSegments.ts';
 import { useWheelAnimation } from '@/composables/useWheelAnimation.ts';
+import { useCardShuffleAnimation } from '@/composables/useCardShuffleAnimation.ts';
 import { useSelectionDialog } from '@/composables/useSelectionDialog.ts';
+import { useRunawayButton } from '@/composables/useRunawayButton.ts';
+import { COLLECT_DURATION } from './cardConstants';
 import WheelSVG from './WheelSVG.vue';
+import CardShuffle from './CardShuffle.vue';
 
 const props = defineProps<{ group?: GroupDetails }>();
 const emit = defineEmits(['updated']);
 
 const availablePeople = ref<Person[]>([]);
 
+// Configured per group (create/edit), not toggled ad hoc here.
+const mode = computed(() => props.group?.selectionStyle ?? DEFAULT_SELECTION_STYLE);
+
 const { weights, totalWeight, wheelSegments } = useWheelSegments(availablePeople);
 
+const wheelAnim = useWheelAnimation(availablePeople, weights, totalWeight);
+const cardAnim = useCardShuffleAnimation(availablePeople, weights, totalWeight);
+
+const activeAnim = computed(() => (mode.value === 'wheel' ? wheelAnim : cardAnim));
+const animating = computed(() => activeAnim.value.animating.value);
+const animationDone = computed(() => activeAnim.value.animationDone.value);
+const selectedPerson = computed(() => activeAnim.value.selectedPerson.value);
+
 const {
-  animating,
-  highlightedIndex,
-  animationDone,
-  selectedPerson,
-  spinWheel,
-  resetAnimation,
-} = useWheelAnimation(availablePeople, weights, totalWeight);
+  buttonRef: selectButtonRef,
+  buttonStyle: selectButtonStyle,
+  isRunning: runawayRunning,
+  start: startRunaway,
+  stop: stopRunaway,
+} = useRunawayButton();
 
 const {
   dialogRef,
@@ -31,9 +46,10 @@ const {
 } = useSelectionDialog(
   selectedPerson,
   availablePeople,
-  resetAnimation,
-  spinWheel,
-  () => emit('updated')
+  () => activeAnim.value.resetAnimation(),
+  () => activeAnim.value.spin(),
+  () => emit('updated'),
+  () => startRunaway(selectedPerson.value)
 );
 
 watch(
@@ -53,8 +69,11 @@ function updateAvailablePeople(group?: GroupDetails) {
 }
 
 async function handleSpin() {
-  await spinWheel();
+  await activeAnim.value.spin();
   if (animationDone.value) {
+    if (mode.value === 'cards') {
+      await new Promise((res) => setTimeout(res, COLLECT_DURATION));
+    }
     openDialog();
   }
 }
@@ -63,13 +82,27 @@ async function handleSpin() {
 <template>
   <div>
     <WheelSVG
-      v-if="availablePeople.length"
+      v-if="availablePeople.length && mode === 'wheel'"
       :segments="wheelSegments"
-      :highlighted-index="highlightedIndex"
+      :highlighted-index="wheelAnim.highlightedIndex.value"
       :animating="animating"
       @spin="handleSpin"
     />
-    <dialog ref="dialogRef">
+    <CardShuffle
+      v-if="availablePeople.length && mode === 'cards'"
+      :people="availablePeople"
+      :revealed-index="cardAnim.revealedIndex.value"
+      :animating="animating"
+      @spin="handleSpin"
+    />
+    <p class="sr-only" aria-live="polite">
+      {{ animationDone && selectedPerson ? `Selected: ${selectedPerson.name}` : '' }}
+    </p>
+    <dialog
+      ref="dialogRef"
+      :class="{ 'runaway-active': runawayRunning }"
+      @close="stopRunaway"
+    >
       <div v-if="selectedPerson">
         <h2>Selected Person</h2>
         <p>
@@ -78,7 +111,13 @@ async function handleSpin() {
         </p>
         <div class="dialog-actions">
           <button @click="handleAbsent">Absent</button>
-          <button @click="() => handleSelect(group)">Select</button>
+          <button
+            ref="selectButtonRef"
+            :style="selectButtonStyle"
+            @click="() => handleSelect(group)"
+          >
+            Select
+          </button>
           <button @click="handleCancel">Cancel</button>
         </div>
       </div>
@@ -93,5 +132,23 @@ async function handleSpin() {
 <style scoped>
 .dialog-actions {
   margin-top: 16px;
+}
+
+/* The UA stylesheet clips dialog content (overflow: auto), which would trap the
+   runaway button inside the popup — let it roam the whole viewport instead. */
+dialog.runaway-active {
+  overflow: visible;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 </style>

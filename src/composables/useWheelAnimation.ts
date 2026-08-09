@@ -35,7 +35,7 @@ export function useWheelAnimation(
   const selectedPerson = ref<Person>();
 
 
-  async function spinWheel(): Promise<void> {
+  async function spin(): Promise<void> {
     if (animating.value || availablePeople.value.length === 0) return;
 
     animating.value = true;
@@ -72,7 +72,7 @@ export function useWheelAnimation(
     highlightedIndex,
     animationDone,
     selectedPerson,
-    spinWheel,
+    spin,
     resetAnimation,
   };
 }

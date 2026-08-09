@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import type { GroupDetails } from '@/types';
 import RandomPersonSelector from "./RandomPersonSelector.vue";
 
@@ -8,23 +8,16 @@ const props = defineProps<{
 }>();
 
 const selectedGroupId = ref<string>();
-const selectedGroup = ref<GroupDetails>();
+
+const selectedGroup = computed(() =>
+  props.groups.find(g => g.id === selectedGroupId.value)
+);
 
 const emit = defineEmits(['group-selected', 'refresh']);
 
-function handleSelection() {
-  selectedGroup.value = props.groups.find(g => g.id === selectedGroupId.value);
-  emit('group-selected', selectedGroup.value);
-}
-
-// Watch for prop changes to update selection
 watch(
-  () => props.groups,
-  () => {
-    if (selectedGroupId.value) {
-      handleSelection();
-    }
-  }
+  selectedGroup,
+  (group) => emit('group-selected', group)
 );
 </script>
 
@@ -32,7 +25,7 @@ watch(
   <div>
     <label>
       Select Group:
-      <select v-model="selectedGroupId" @change="handleSelection">
+      <select v-model="selectedGroupId">
         <option disabled value="">-- Select a group --</option>
         <option v-for="group in props.groups" :key="group.id" :value="group.id">
           {{ group.name }}
@@ -44,6 +37,7 @@ watch(
       <h3>Group Details</h3>
       <p><strong>Name:</strong> {{ selectedGroup.name }}</p>
       <p><strong>Respect Early Selection:</strong> {{ selectedGroup.respectEarlySelection ? 'Yes' : 'No' }}</p>
+      <p><strong>Selection Style:</strong> {{ selectedGroup.selectionStyle === 'cards' ? 'Card Shuffle' : 'Spinning Wheel' }}</p>
       <RandomPersonSelector
           :group="selectedGroup"
           @updated="emit('refresh')"
@@ -52,7 +46,3 @@ watch(
     </div>
   </div>
 </template>
-
-<style scoped>
-/* ...existing code... */
-</style>
