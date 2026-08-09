@@ -108,9 +108,6 @@ function handleShuffle() {
   }
 }
 
-// How far card `idx` sits from the fanned row's center, so it can be
-// translated there to form a pile.
-
 function isFaceUp(idx: number): boolean {
   if (phase.value === 'revealed') return idx === props.revealedIndex;
   return phase.value === 'idle';

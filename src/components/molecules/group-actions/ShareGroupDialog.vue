@@ -16,6 +16,7 @@ const shareUrl = computed(() => {
   return encodeGroupToUrl({
     name: props.group.name,
     respectEarlySelection: props.group.respectEarlySelection,
+    selectionStyle: props.group.selectionStyle,
     people: props.group.people,
   });
 });

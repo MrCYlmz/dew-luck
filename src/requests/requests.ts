@@ -1,4 +1,5 @@
 import type { GroupCreateRequest, GroupDetails } from '../types.ts';
+import { DEFAULT_SELECTION_STYLE } from '../types.ts';
 import { generateId } from '../utils/id.ts';
 
 const STORAGE_KEY = 'dew-luck-groups';
@@ -16,9 +17,12 @@ function getGroupsFromStorage(): GroupDetails[] {
     }
   }
 
-  // Backfill ids for people persisted before `Person.id` existed.
   let mutated = false;
   for (const group of groups) {
+    if (!group.selectionStyle) {
+      group.selectionStyle = DEFAULT_SELECTION_STYLE;
+      mutated = true;
+    }
     for (const person of group.people) {
       if (!person.id) {
         person.id = generateId();
@@ -56,6 +60,7 @@ export async function createGroup(data: GroupCreateRequest) {
     id: data.id || generateId(),
     name: data.name,
     respectEarlySelection: data.respectEarlySelection,
+    selectionStyle: data.selectionStyle || DEFAULT_SELECTION_STYLE,
     people: data.people,
   };
   groups.push(newGroup);

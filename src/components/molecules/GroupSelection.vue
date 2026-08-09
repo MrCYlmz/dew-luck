@@ -37,6 +37,7 @@ watch(
       <h3>Group Details</h3>
       <p><strong>Name:</strong> {{ selectedGroup.name }}</p>
       <p><strong>Respect Early Selection:</strong> {{ selectedGroup.respectEarlySelection ? 'Yes' : 'No' }}</p>
+      <p><strong>Selection Style:</strong> {{ selectedGroup.selectionStyle === 'cards' ? 'Card Shuffle' : 'Spinning Wheel' }}</p>
       <RandomPersonSelector
           :group="selectedGroup"
           @updated="emit('refresh')"

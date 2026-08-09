@@ -43,6 +43,9 @@ defineExpose({ openDialog, closeDialog });
         <div class="detail-row">
           <strong>Respect Early Selection:</strong> {{ groupToImport.respectEarlySelection ? 'Yes' : 'No' }}
         </div>
+        <div class="detail-row">
+          <strong>Selection Style:</strong> {{ groupToImport.selectionStyle === 'cards' ? 'Card Shuffle' : 'Spinning Wheel' }}
+        </div>
         <div>
           <strong>People ({{ groupToImport.people.length }}):</strong>
           <ul class="people-list">

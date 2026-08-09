@@ -1,4 +1,5 @@
 import type { GroupCreateRequest } from '../types';
+import { DEFAULT_SELECTION_STYLE } from '../types';
 import { generateId } from './id';
 
 const URL_PARAM_KEY = 'shared';
@@ -41,6 +42,12 @@ export function decodeGroupFromUrl(): GroupCreateRequest | null {
     // Validate the group structure
     if (!group.name || !Array.isArray(group.people)) {
       throw new Error('Invalid group structure');
+    }
+
+    // Links shared before `selectionStyle` existed (or with a bogus value)
+    // fall back to the default rather than reaching the UI unrecognised.
+    if (group.selectionStyle !== 'wheel' && group.selectionStyle !== 'cards') {
+      group.selectionStyle = DEFAULT_SELECTION_STYLE;
     }
 
     group.people = group.people

@@ -12,11 +12,11 @@ const emit = defineEmits(['updated', 'closed']);
 
 const dialogRef = ref<HTMLDialogElement>();
 
-const { form, addPerson, removePerson, loadFromPeople } = useGroupForm();
+const { form, addPerson, removePerson, loadFromGroup } = useGroupForm();
 
 function openDialog() {
   if (props.group) {
-    loadFromPeople(props.group.name, props.group.respectEarlySelection, props.group.people);
+    loadFromGroup(props.group);
     dialogRef.value?.showModal();
   }
 }
@@ -32,6 +32,7 @@ async function handleSubmit() {
     id: props.group.id,
     name: form.name,
     respectEarlySelection: form.respectEarlySelection,
+    selectionStyle: form.selectionStyle,
     people: form.people.map(p => ({
       id: p.id,
       name: p.name,

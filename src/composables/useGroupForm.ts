@@ -1,11 +1,20 @@
 import { reactive, watch } from 'vue';
-import type { Person } from '../types';
+import type { Person, SelectionStyle } from '../types';
+import { DEFAULT_SELECTION_STYLE } from '../types';
 import { generateId } from '../utils/id';
 
 export interface GroupFormState {
   name: string;
   respectEarlySelection: boolean;
+  selectionStyle: SelectionStyle;
   isWeightedSelection: boolean;
+  people: Person[];
+}
+
+interface GroupFormSource {
+  name: string;
+  respectEarlySelection: boolean;
+  selectionStyle: SelectionStyle;
   people: Person[];
 }
 
@@ -13,6 +22,7 @@ export function useGroupForm() {
   const form = reactive<GroupFormState>({
     name: '',
     respectEarlySelection: false,
+    selectionStyle: DEFAULT_SELECTION_STYLE,
     isWeightedSelection: false,
     people: [],
   });
@@ -37,20 +47,20 @@ export function useGroupForm() {
   function resetForm() {
     form.name = '';
     form.respectEarlySelection = false;
+    form.selectionStyle = DEFAULT_SELECTION_STYLE;
     form.isWeightedSelection = false;
     form.people = [];
   }
 
-  function loadFromPeople(
-    name: string,
-    respectEarlySelection: boolean,
-    people: Person[],
-    opts?: { regenerateIds?: boolean; resetSelection?: boolean }
+  function loadFromGroup(
+    source: GroupFormSource,
+    opts?: { name?: string; regenerateIds?: boolean; resetSelection?: boolean }
   ) {
-    form.name = name;
-    form.respectEarlySelection = respectEarlySelection;
-    form.isWeightedSelection = people.some((p) => p.weight !== 1);
-    form.people = people.map((p) => ({
+    form.name = opts?.name ?? source.name;
+    form.respectEarlySelection = source.respectEarlySelection;
+    form.selectionStyle = source.selectionStyle ?? DEFAULT_SELECTION_STYLE;
+    form.isWeightedSelection = source.people.some((p) => p.weight !== 1);
+    form.people = source.people.map((p) => ({
       id: opts?.regenerateIds ? generateId() : p.id,
       name: p.name,
       weight: p.weight,
@@ -58,5 +68,5 @@ export function useGroupForm() {
     }));
   }
 
-  return { form, addPerson, removePerson, resetForm, loadFromPeople };
+  return { form, addPerson, removePerson, resetForm, loadFromGroup };
 }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import type { GroupDetails, Person } from '@/types.ts';
+import { DEFAULT_SELECTION_STYLE } from '@/types.ts';
 import { useWheelSegments } from '@/composables/useWheelSegments.ts';
 import { useWheelAnimation } from '@/composables/useWheelAnimation.ts';
 import { useCardShuffleAnimation } from '@/composables/useCardShuffleAnimation.ts';
@@ -13,7 +14,9 @@ const props = defineProps<{ group?: GroupDetails }>();
 const emit = defineEmits(['updated']);
 
 const availablePeople = ref<Person[]>([]);
-const mode = ref<'wheel' | 'cards'>('wheel');
+
+// Configured per group (create/edit), not toggled ad hoc here.
+const mode = computed(() => props.group?.selectionStyle ?? DEFAULT_SELECTION_STYLE);
 
 const { weights, totalWeight, wheelSegments } = useWheelSegments(availablePeople);
 
@@ -55,11 +58,6 @@ function updateAvailablePeople(group?: GroupDetails) {
     : group.people;
 }
 
-function setMode(next: 'wheel' | 'cards') {
-  if (animating.value) return;
-  mode.value = next;
-}
-
 async function handleSpin() {
   await activeAnim.value.spin();
   if (animationDone.value) {
@@ -73,22 +71,6 @@ async function handleSpin() {
 
 <template>
   <div>
-    <div v-if="availablePeople.length" class="mode-toggle">
-      <button
-        type="button"
-        :disabled="mode === 'wheel' || animating"
-        @click="setMode('wheel')"
-      >
-        Wheel
-      </button>
-      <button
-        type="button"
-        :disabled="mode === 'cards' || animating"
-        @click="setMode('cards')"
-      >
-        Cards
-      </button>
-    </div>
     <WheelSVG
       v-if="availablePeople.length && mode === 'wheel'"
       :segments="wheelSegments"
@@ -128,10 +110,6 @@ async function handleSpin() {
 </template>
 
 <style scoped>
-.mode-toggle {
-  margin-bottom: 8px;
-}
-
 .dialog-actions {
   margin-top: 16px;
 }

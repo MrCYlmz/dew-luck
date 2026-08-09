@@ -24,6 +24,7 @@ async function handleSubmit() {
   await createGroup({
     name: form.name,
     respectEarlySelection: form.respectEarlySelection,
+    selectionStyle: form.selectionStyle,
     people: form.people.map(p => ({
       id: p.id,
       name: p.name,

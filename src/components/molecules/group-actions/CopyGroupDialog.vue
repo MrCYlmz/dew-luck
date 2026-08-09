@@ -12,11 +12,13 @@ const emit = defineEmits(['closed']);
 
 const dialogRef = ref<HTMLDialogElement | null>(null);
 
-const { form, addPerson, removePerson, loadFromPeople } = useGroupForm();
+const { form, addPerson, removePerson, loadFromGroup } = useGroupForm();
 
 function openDialog() {
   if (props.group) {
-    loadFromPeople('', props.group.respectEarlySelection, props.group.people, {
+    // Name stays empty so the copy gets its own; people become new entities.
+    loadFromGroup(props.group, {
+      name: '',
       regenerateIds: true,
       resetSelection: true,
     });
@@ -33,6 +35,7 @@ async function handleSubmit() {
   await createGroup({
     name: form.name,
     respectEarlySelection: form.respectEarlySelection,
+    selectionStyle: form.selectionStyle,
     people: form.people.map((p) => ({
       id: p.id,
       name: p.name,
