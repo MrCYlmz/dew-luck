@@ -8,13 +8,15 @@ export function useSelectionDialog(
   availablePeople: Ref<Person[]>,
   resetAnimation: () => void,
   spinWheel: () => Promise<void>,
-  onUpdated: () => void
+  onUpdated: () => void,
+  onOpened?: () => void
 ) {
   const dialogRef = ref<HTMLDialogElement>();
 
   async function openDialog(): Promise<void> {
     await nextTick();
     dialogRef.value?.showModal();
+    onOpened?.();
   }
 
   function closeDialog(): void {

@@ -6,6 +6,7 @@ import { useWheelSegments } from '@/composables/useWheelSegments.ts';
 import { useWheelAnimation } from '@/composables/useWheelAnimation.ts';
 import { useCardShuffleAnimation } from '@/composables/useCardShuffleAnimation.ts';
 import { useSelectionDialog } from '@/composables/useSelectionDialog.ts';
+import { useRunawayButton } from '@/composables/useRunawayButton.ts';
 import { COLLECT_DURATION } from './cardConstants';
 import WheelSVG from './WheelSVG.vue';
 import CardShuffle from './CardShuffle.vue';
@@ -29,6 +30,14 @@ const animationDone = computed(() => activeAnim.value.animationDone.value);
 const selectedPerson = computed(() => activeAnim.value.selectedPerson.value);
 
 const {
+  buttonRef: selectButtonRef,
+  buttonStyle: selectButtonStyle,
+  isRunning: runawayRunning,
+  start: startRunaway,
+  stop: stopRunaway,
+} = useRunawayButton();
+
+const {
   dialogRef,
   openDialog,
   handleSelect,
@@ -39,7 +48,8 @@ const {
   availablePeople,
   () => activeAnim.value.resetAnimation(),
   () => activeAnim.value.spin(),
-  () => emit('updated')
+  () => emit('updated'),
+  () => startRunaway(selectedPerson.value)
 );
 
 watch(
@@ -88,7 +98,11 @@ async function handleSpin() {
     <p class="sr-only" aria-live="polite">
       {{ animationDone && selectedPerson ? `Selected: ${selectedPerson.name}` : '' }}
     </p>
-    <dialog ref="dialogRef">
+    <dialog
+      ref="dialogRef"
+      :class="{ 'runaway-active': runawayRunning }"
+      @close="stopRunaway"
+    >
       <div v-if="selectedPerson">
         <h2>Selected Person</h2>
         <p>
@@ -97,7 +111,13 @@ async function handleSpin() {
         </p>
         <div class="dialog-actions">
           <button @click="handleAbsent">Absent</button>
-          <button @click="() => handleSelect(group)">Select</button>
+          <button
+            ref="selectButtonRef"
+            :style="selectButtonStyle"
+            @click="() => handleSelect(group)"
+          >
+            Select
+          </button>
           <button @click="handleCancel">Cancel</button>
         </div>
       </div>
@@ -112,6 +132,12 @@ async function handleSpin() {
 <style scoped>
 .dialog-actions {
   margin-top: 16px;
+}
+
+/* The UA stylesheet clips dialog content (overflow: auto), which would trap the
+   runaway button inside the popup — let it roam the whole viewport instead. */
+dialog.runaway-active {
+  overflow: visible;
 }
 
 .sr-only {
