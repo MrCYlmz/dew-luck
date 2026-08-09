@@ -1,26 +1,29 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import type { GroupDetails, Person } from '@/types.ts';
 import { useWheelSegments } from '@/composables/useWheelSegments.ts';
 import { useWheelAnimation } from '@/composables/useWheelAnimation.ts';
+import { useCardShuffleAnimation } from '@/composables/useCardShuffleAnimation.ts';
 import { useSelectionDialog } from '@/composables/useSelectionDialog.ts';
+import { COLLECT_DURATION } from './cardConstants';
 import WheelSVG from './WheelSVG.vue';
+import CardShuffle from './CardShuffle.vue';
 
 const props = defineProps<{ group?: GroupDetails }>();
 const emit = defineEmits(['updated']);
 
 const availablePeople = ref<Person[]>([]);
+const mode = ref<'wheel' | 'cards'>('wheel');
 
 const { weights, totalWeight, wheelSegments } = useWheelSegments(availablePeople);
 
-const {
-  animating,
-  highlightedIndex,
-  animationDone,
-  selectedPerson,
-  spinWheel,
-  resetAnimation,
-} = useWheelAnimation(availablePeople, weights, totalWeight);
+const wheelAnim = useWheelAnimation(availablePeople, weights, totalWeight);
+const cardAnim = useCardShuffleAnimation(availablePeople, weights, totalWeight);
+
+const activeAnim = computed(() => (mode.value === 'wheel' ? wheelAnim : cardAnim));
+const animating = computed(() => activeAnim.value.animating.value);
+const animationDone = computed(() => activeAnim.value.animationDone.value);
+const selectedPerson = computed(() => activeAnim.value.selectedPerson.value);
 
 const {
   dialogRef,
@@ -31,8 +34,8 @@ const {
 } = useSelectionDialog(
   selectedPerson,
   availablePeople,
-  resetAnimation,
-  spinWheel,
+  () => activeAnim.value.resetAnimation(),
+  () => activeAnim.value.spin(),
   () => emit('updated')
 );
 
@@ -52,9 +55,17 @@ function updateAvailablePeople(group?: GroupDetails) {
     : group.people;
 }
 
+function setMode(next: 'wheel' | 'cards') {
+  if (animating.value) return;
+  mode.value = next;
+}
+
 async function handleSpin() {
-  await spinWheel();
+  await activeAnim.value.spin();
   if (animationDone.value) {
+    if (mode.value === 'cards') {
+      await new Promise((res) => setTimeout(res, COLLECT_DURATION));
+    }
     openDialog();
   }
 }
@@ -62,13 +73,39 @@ async function handleSpin() {
 
 <template>
   <div>
+    <div v-if="availablePeople.length" class="mode-toggle">
+      <button
+        type="button"
+        :disabled="mode === 'wheel' || animating"
+        @click="setMode('wheel')"
+      >
+        Wheel
+      </button>
+      <button
+        type="button"
+        :disabled="mode === 'cards' || animating"
+        @click="setMode('cards')"
+      >
+        Cards
+      </button>
+    </div>
     <WheelSVG
-      v-if="availablePeople.length"
+      v-if="availablePeople.length && mode === 'wheel'"
       :segments="wheelSegments"
-      :highlighted-index="highlightedIndex"
+      :highlighted-index="wheelAnim.highlightedIndex.value"
       :animating="animating"
       @spin="handleSpin"
     />
+    <CardShuffle
+      v-if="availablePeople.length && mode === 'cards'"
+      :people="availablePeople"
+      :revealed-index="cardAnim.revealedIndex.value"
+      :animating="animating"
+      @spin="handleSpin"
+    />
+    <p class="sr-only" aria-live="polite">
+      {{ animationDone && selectedPerson ? `Selected: ${selectedPerson.name}` : '' }}
+    </p>
     <dialog ref="dialogRef">
       <div v-if="selectedPerson">
         <h2>Selected Person</h2>
@@ -91,7 +128,23 @@ async function handleSpin() {
 </template>
 
 <style scoped>
+.mode-toggle {
+  margin-bottom: 8px;
+}
+
 .dialog-actions {
   margin-top: 16px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 </style>
