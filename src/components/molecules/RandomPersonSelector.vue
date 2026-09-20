@@ -6,10 +6,11 @@ import { useWheelSegments } from '@/composables/useWheelSegments.ts';
 import { useWheelAnimation } from '@/composables/useWheelAnimation.ts';
 import { useCardShuffleAnimation } from '@/composables/useCardShuffleAnimation.ts';
 import { useSelectionDialog } from '@/composables/useSelectionDialog.ts';
-import { useRunawayButton } from '@/composables/useRunawayButton.ts';
+import { useSadFaceEasterEgg } from '@/composables/useSadFaceEasterEgg.ts';
 import { COLLECT_DURATION } from './cardConstants';
 import WheelSVG from './WheelSVG.vue';
 import CardShuffle from './CardShuffle.vue';
+import SadFacePopups from './SadFacePopups.vue';
 
 const props = defineProps<{ group?: GroupDetails }>();
 const emit = defineEmits(['updated']);
@@ -30,12 +31,14 @@ const animationDone = computed(() => activeAnim.value.animationDone.value);
 const selectedPerson = computed(() => activeAnim.value.selectedPerson.value);
 
 const {
-  buttonRef: selectButtonRef,
-  buttonStyle: selectButtonStyle,
-  isRunning: runawayRunning,
-  start: startRunaway,
-  stop: stopRunaway,
-} = useRunawayButton();
+  confirmDialogRef,
+  sadFaces,
+  scheduleConfirm,
+  cancelConfirm,
+  closeConfirm,
+  spawnSadFaces,
+  dismissSadFace,
+} = useSadFaceEasterEgg();
 
 const {
   dialogRef,
@@ -49,8 +52,14 @@ const {
   () => activeAnim.value.resetAnimation(),
   () => activeAnim.value.spin(),
   () => emit('updated'),
-  () => startRunaway(selectedPerson.value)
+  () => scheduleConfirm(selectedPerson.value)
 );
+
+async function handleConfirmYes() {
+  closeConfirm();
+  await handleSelect(props.group);
+  spawnSadFaces();
+}
 
 watch(
   () => props.group,
@@ -98,11 +107,7 @@ async function handleSpin() {
     <p class="sr-only" aria-live="polite">
       {{ animationDone && selectedPerson ? `Selected: ${selectedPerson.name}` : '' }}
     </p>
-    <dialog
-      ref="dialogRef"
-      :class="{ 'runaway-active': runawayRunning }"
-      @close="stopRunaway"
-    >
+    <dialog ref="dialogRef" @close="cancelConfirm">
       <div v-if="selectedPerson">
         <h2>Selected Person</h2>
         <p>
@@ -111,13 +116,7 @@ async function handleSpin() {
         </p>
         <div class="dialog-actions">
           <button @click="handleAbsent">Absent</button>
-          <button
-            ref="selectButtonRef"
-            :style="selectButtonStyle"
-            @click="() => handleSelect(group)"
-          >
-            Select
-          </button>
+          <button @click="() => handleSelect(group)">Select</button>
           <button @click="handleCancel">Cancel</button>
         </div>
       </div>
@@ -126,18 +125,21 @@ async function handleSpin() {
         <button @click="handleCancel">Close</button>
       </div>
     </dialog>
+    <dialog ref="confirmDialogRef">
+      <h2>Are you sure?</h2>
+      <p>Are you sure you want to select <strong>{{ selectedPerson?.name }}</strong>?</p>
+      <div class="dialog-actions">
+        <button @click="handleConfirmYes">Yes</button>
+        <button @click="closeConfirm">No</button>
+      </div>
+    </dialog>
+    <SadFacePopups :faces="sadFaces" @dismiss="dismissSadFace" />
   </div>
 </template>
 
 <style scoped>
 .dialog-actions {
   margin-top: 16px;
-}
-
-/* The UA stylesheet clips dialog content (overflow: auto), which would trap the
-   runaway button inside the popup — let it roam the whole viewport instead. */
-dialog.runaway-active {
-  overflow: visible;
 }
 
 .sr-only {
