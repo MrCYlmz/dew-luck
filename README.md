@@ -1,5 +1,7 @@
 # Dew-Luck
 
+**Live demo:** https://MrCYlmz.github.io/dew-luck/
+
 A Vue 3 + TypeScript + Vite application for managing weighted random person selection. Create groups of people with custom weights and randomly select individuals using an animated spinning wheel interface.
 
 ## Features
@@ -17,7 +19,7 @@ A Vue 3 + TypeScript + Vite application for managing weighted random person sele
 
 ## Requirements
 
-- Node.js (v16 or higher recommended)
+- Node.js 20.19+ or 22.12+ (required by Vite 7)
 - npm or yarn package manager
 - Modern web browser with localStorage support
 
@@ -25,7 +27,7 @@ A Vue 3 + TypeScript + Vite application for managing weighted random person sele
 
 ```bash
 # Clone the repository
-git clone https://github.com/celal/dew-luck.git
+git clone https://github.com/MrCYlmz/dew-luck.git
 cd dew-luck
 
 # Install dependencies
@@ -46,7 +48,7 @@ npm run preview
 ```
 
 ## Deployment
-This app is configured for easy deployment to GitHub Pages. Access the site at `https://MrCYlmz.github.io/dew-luck/`
+The `main` branch is deployed automatically to GitHub Pages via GitHub Actions (`.github/workflows/deploy.yml`). Live site: https://MrCYlmz.github.io/dew-luck/
 
 ## Usage
 
@@ -117,21 +119,16 @@ localStorage.removeItem('dew-luck-groups');
 
 ## Contributing
 
-Contributions are welcome! Please follow these guidelines:
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes with clear commit messages
-4. Submit a pull request
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get started, and please follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## License
 
-MIT License - feel free to use this project for any purpose.
+[MIT](LICENSE) © Celal Yilmaz
 
 ## Support
 
 For issues or questions:
 - Open an issue on GitHub
-- Check the `CLAUDE.md` file for development guidelines
 
 ---
 
